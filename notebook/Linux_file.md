@@ -149,7 +149,7 @@
 ### write
 
 - 函数原型: `ssize_t write (int __fd, const void *__buf, size_t __n)`
-- 返回值: 参考*read*函数
+- 返回值: 返回成功写入的数量
 - 参数:
     1. __fd: 要写入的文件的文件标识符
     2. __buf: 要写入的数据
