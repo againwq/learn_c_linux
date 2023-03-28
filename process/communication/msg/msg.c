@@ -38,15 +38,15 @@ struct msgmbuf   //消息的缓冲区结构
 int main(int argc, char const *argv[])
 {
     int ret = -1;
-    int msg_flags, msg_id;
-    key_t key;
-    struct msqid_ds msg_info;
-    struct msgmbuf msg_mbuf;
+    int msg_flags, msg_id;  //msg_id: 消息队列的唯一标识
+    key_t key; // 创建消息队列所需要的key
+    struct msqid_ds msg_info;  // msg_info：消息队列的属性
+    struct msgmbuf msg_mbuf;  // 消息队列中每个消息的结构
 
-    int msg_sflags, msg_rflags;
+    int msg_sflags, msg_rflags; //建立发送和接收数据时的模式(flag)
 
     char *msgpath = "/ipc/msg";
-    key = ftok(msgpath, 'b');  //建立key,key在内核中用于区分其他消息队列
+    key = ftok(msgpath, 'c');  //建立key,key在内核中用于区分其他消息队列
 
     if(key == -1){
         printf("创建key失败\n");
