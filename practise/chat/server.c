@@ -8,7 +8,7 @@
 #include <sys/shm.h>
 #include <sys/ipc.h>
 
-#define PROT 8000   //监听端口
+#define PORT 8000   //监听端口
 #define BACKLOG 5   //监听队列长度
 #define MAX_CLIENT 10
 #define IP "127.0.0.1"
@@ -37,7 +37,7 @@ int main(int argc, char const *argv[])
 
     memset(&server_addr, 0, sizeof(struct sockaddr_in));
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = PROT; //端口号
+    server_addr.sin_port = htons(PORT); //端口号
     inet_pton(AF_INET, IP, &server_addr.sin_addr); //IP
 
     err = bind(ss, (struct sockaddr*) &server_addr, sizeof(server_addr)); //给ss绑定端口号和ip

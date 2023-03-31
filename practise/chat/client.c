@@ -3,11 +3,13 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <unistd.h>
-#include <pthread.h>
 #include <arpa/inet.h>
+#include <unistd.h>
+#include <sys/shm.h>
+#include <sys/ipc.h>
+#include <pthread.h>
 
-#define PROT 8000
+#define PORT 8000
 #define IP "127.0.0.1"
 
 void client_handle(int *s_fd);
@@ -19,16 +21,15 @@ int main(int argc, char const *argv[])
     int s;
     struct sockaddr_in server_addr;
     
-
     s = socket(AF_INET, SOCK_STREAM, 0);
     if(s < 0){
         printf("创建socket失败\n");
         return -1;
     }
     memset(&server_addr, 0, sizeof(struct sockaddr_in));
-    server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    inet_pton(AF_INET, IP, &server_addr.sin_addr);
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = PROT;
+    server_addr.sin_port = htons(PORT);
 
     inet_pton(AF_INET, IP, &server_addr.sin_addr); //解析命令行传过来的参数作为ip地址
 
@@ -48,7 +49,8 @@ void client_handle(int *s_fd){
         exit(-1);
     }
     for(;;){
-        size = read(0, buf, 1024);  //从标准输入(即用户在命令行的输入)获取到数据
+        memset(buf, 0, sizeof(buf));
+        size = read(0, buf, sizeof(buf));  //从标准输入(即用户在命令行的输入)获取到数据
         if(size > 0){
             write(*s_fd, buf, size); // 向服务端的fd写入获取到的数据
         }
