@@ -70,7 +70,12 @@ void get_server_client(void *arg){
     {
         char buf[1024];
         ssize_t size = read(*ss_fd, buf, 1024);
-        printf("%s", buf);
+        if(size > 0){
+            printf("%s", buf);
+        }else{
+            printf("服务器内部错误\n");
+            exit(0);
+        }
     }
 }
 void sig_handle(int signo){

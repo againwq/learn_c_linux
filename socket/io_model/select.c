@@ -92,7 +92,7 @@ int main(int argc, char const *argv[])
                 printf("新连接建立失败\n");
                 continue;
             }
-            if(connections + 1 >= MAX_CLIENT){
+            if(connections + 1 >= MAX_CLIENT){  //超出最大连接
                 printf("超出最大连接！\n");
                 send(cs, "忙线中...", sizeof("忙线中..."), 0);
                 close(cs);
@@ -101,6 +101,13 @@ int main(int argc, char const *argv[])
                 fds[connections++] = cs;
                 printf("新加连接: %d, PORT: %d, ip: %d\n", cs, client_addr.sin_port, client_addr.sin_addr.s_addr);
                 printf("当前总连接数: %d\n", connections);
+                for(int i = 0; i < connections; i++){
+                    if(FD_ISSET(fds[i], &wd)){
+                        memset(tmpBuf, 0, MAX_BUF);
+                        sprintf(tmpBuf, "c_fd: %d 加入\n", cs);
+                        write(fds[i], tmpBuf, MAX_BUF);
+                    }
+                }
             }
         }
         
@@ -124,13 +131,10 @@ int server_handle(int c_fd){
 
     memset(tmpBuf, 0, MAX_BUF);
     size = recv(c_fd, tmpBuf, MAX_BUF, 0);
-    if(size < 0){
-        if(errno == EINTR){
-            printf("c_fd: %d 断开连接\n", c_fd);
-            close(c_fd);
-            return -1;
-        }
-        
+    if(size <= 0){
+        printf("c_fd: %d 断开连接\n", c_fd);
+        close(c_fd);
+        return -1;
     }else{
         sprintf(writebuf, "来自%d的数据: %s", c_fd, tmpBuf);
         for(int i = 0; i < MAX_CLIENT; i++){
@@ -140,8 +144,9 @@ int server_handle(int c_fd){
                     printf("写入失败 源: %d, 目的: %d\n", c_fd, fds[i]);
                     continue;
                 }
-                printf("源：%d, 目的：%d,写入的数据: %s\n", c_fd, fds[i], writebuf);
             }
         }
     }
+
+    return 0;
 }
