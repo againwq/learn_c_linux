@@ -73,7 +73,7 @@ void get_server_client(void *arg){
         if(size > 0){
             printf("%s", buf);
         }else{
-            printf("服务器内部错误\n");
+            printf("感谢使用\n");
             exit(0);
         }
     }
