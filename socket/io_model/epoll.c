@@ -1,3 +1,5 @@
+// epoll和select的最大区别在于他的时间复杂度是O(1),且用户不用遍历所有的文件描述符。
+
 #include <stdio.h>
 #include <sys/epoll.h>
 #include <sys/socket.h>
@@ -65,14 +67,14 @@ int main(int argc, char const *argv[])
         return -1;
     }
 
-    struct epoll_event events[MAX_EVENTS];
-    int epoll_fd = epoll_create(MAX_CLIENT);
+    struct epoll_event events[MAX_EVENTS];  // 这个用来存放需要监听的事件
+    int epoll_fd = epoll_create(MAX_CLIENT);  // 创建epoll实例对象
     if(epoll_fd < 0){
         printf("创建epoll示例失败\n");
         return -1;
     }
     addfd(epoll_fd, ss, 0);
-    cur_fd = 1;
+    cur_fd = 1;   // 用于标识有多少个连接需要监听
     while (1)
     {
         wait_fd = epoll_wait(epoll_fd, events, cur_fd, TIMEOUT);
