@@ -47,5 +47,4 @@ void *consumer_f(void *arg){
         printf("消费,总数量: %d\n", buffer_has_item);
         pthread_mutex_unlock(&mutex);
     }
-    
 }
