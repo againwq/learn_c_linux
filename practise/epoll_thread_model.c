@@ -1,12 +1,11 @@
-#include <stdio.h>
 #include <sys/types.h>
-#include <pthread.h>
 #include <sys/socket.h>
 #include <sys/epoll.h>
 #include <arpa/inet.h>
 #include <string.h>
 #include <signal.h>
 #include <fcntl.h>
+#include "thread_pool.h"
 
 #define PORT 8080
 #define IP "127.0.0.1"
@@ -24,6 +23,7 @@ int main(int argc, char const *argv[])
     struct sockaddr_in s_addr, c_addr;
     int err = 0;
     socklen_t len;
+    threadpool_t *pool = threadpool_create(10, 20, 15);
 
     ss = socket(AF_INET, SOCK_STREAM, 0);
     if(ss < 0){
@@ -47,15 +47,15 @@ int main(int argc, char const *argv[])
         perror("listen()");
         return -1;
     }
-
     struct epoll_event events[MAX_EVENT];
-    int cur_fd, i, wait_fds;
+    int cur_fd = 0, i, wait_fds;
     int epollfd = epoll_create(MAX_CLIENT);
     if(epollfd < 0){
         perror("epoll_create()");
         return -1;
     }
-
+    add_fd_epoll(epollfd, ss, 0);
+    cur_fd++;
     while (1)
     {
         wait_fds = epoll_wait(epollfd, events, cur_fd, 3);
@@ -76,11 +76,12 @@ int main(int argc, char const *argv[])
                 printf("新连接: cs: %d, ip: %s\n", cs, inet_ntoa(c_addr.sin_addr));
                 continue;
             }
-            pthread_t pt;
-            pthread_create(&pt, NULL, server_handle, &cs);
-
+            threadpool_add_task(pool, (void*)server_handle, (void*)&cs);
         }
     }
+
+    threadpool_free(pool);
+    threadpool_destroy(pool);
 
     return 0;
 }
