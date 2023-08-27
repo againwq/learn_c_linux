@@ -33,7 +33,6 @@ int main(int argc, char *argv[])
     char buff[BUF_SIZE];
     ssize_t size;
     
-
     ss = socket(AF_INET, SOCK_DGRAM, 0);
     if(ss < 0){
         printf("socket创建失败\n");

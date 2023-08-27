@@ -64,9 +64,8 @@ int main(int argc, char const *argv[])
             return -1;
         }
         for(i = 0; i < wait_fds; i++){
-            int cs;
             if(events[i].data.fd == ss && cur_fd < MAX_CLIENT){
-                cs = accept(ss, (struct sockaddr*)&c_addr, &len);
+                int cs = accept(ss, (struct sockaddr*)&c_addr, &len);
                 if(cs  < 0){
                     perror("accept()");
                     continue;
@@ -76,11 +75,10 @@ int main(int argc, char const *argv[])
                 printf("新连接: cs: %d, ip: %s\n", cs, inet_ntoa(c_addr.sin_addr));
                 continue;
             }
-            threadpool_add_task(pool, (void*)server_handle, (void*)&cs);
+            threadpool_add_task(pool, (void*)server_handle, (void*)&events[i].data.fd);
         }
     }
 
-    threadpool_free(pool);
     threadpool_destroy(pool);
 
     return 0;
@@ -108,9 +106,10 @@ void *server_handle(void *p_fd){
     int *cs = p_fd;
     ssize_t size;
     char readbuf[1024];
-    char writebuf[1024];
     size = recv(*cs, readbuf, sizeof(readbuf), 0);
-    if(size < 0){
+    if(size <= 0){
         printf("断开连接");
+        pthread_exit(NULL);
     }
+    send(*cs, readbuf, sizeof(readbuf), 0);
 }

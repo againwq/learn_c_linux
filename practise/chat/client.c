@@ -8,19 +8,27 @@
 #include <sys/shm.h>
 #include <sys/ipc.h>
 #include <pthread.h>
+#include <signal.h>
 
-#define PORT 8000
+#define PORT 8080
 #define IP "127.0.0.1"
 
 void client_handle(int *s_fd);
 void get_server_client(void *arg);
-
+void signal_handler(int signo){
+    if(signo == SIGINT){
+        printf("SIGINT");
+        exit(0);
+    }
+}
 pthread_t p;
 int main(int argc, char const *argv[])
 {
     int s;
     struct sockaddr_in server_addr;
     
+    signal(SIGINT, signal_handler);
+
     s = socket(AF_INET, SOCK_STREAM, 0);
     if(s < 0){
         printf("创建socket失败\n");
@@ -56,13 +64,12 @@ void client_handle(int *s_fd){
         }
     }
 }
-
 void get_server_client(void *arg){
     int *ss_fd = arg;
     while (1)
     {
         char buf[1024];
         ssize_t size = read(*ss_fd, buf, 1024);
-        write(1, buf, size);
+        printf("返回的数据: %s\n", buf);
     }
 }
